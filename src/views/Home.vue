@@ -1,18 +1,30 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="home-container">
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
-export default {
-  name: 'home',
-  components: {
-    HelloWorld
+  export default {
+    name: 'home',
+    components: {},
+    methods: {
+      startCollage: function() {
+        this.$router.push('/collage');
+      }
+    }
   }
-}
 </script>
+
+<style lang="scss">
+  .home-container {
+    padding-bottom: 100px;
+    .btn {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      margin-left: -335px;
+    }
+  }    
+</style>
+
+
