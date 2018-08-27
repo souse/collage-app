@@ -20,18 +20,17 @@
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #000;
   }
   .btn {
-    width: 670px;
-    height: 92px;
-    line-height: 92px;
-    border-radius: 16px !important;
+    width: 335px;
+    height: 46px !important;
+    line-height: 46px !important;
+    border-radius: 8px !important;
     &.common {
       background: #F7C077; 
       border-color: #F7C077;
-      font-size: 32px;
+      font-size: 16px;
       color: #fff;      
     }
   }
