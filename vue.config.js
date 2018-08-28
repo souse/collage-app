@@ -6,5 +6,8 @@ module.exports = {
   assetsDir: 'static',
   runtimeCompiler: undefined,
   productionSourceMap: undefined,
-  parallel: undefined
+  parallel: undefined,
+  configureWebpack: config => {
+    //console.log(config);
+  }
 }

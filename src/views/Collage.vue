@@ -15,8 +15,15 @@
         label="验证码"
         placeholder="请输入短信验证码"
       >
-        <van-button class="sms-code" slot="button" size="small" type="primary">
-          获取验证码
+        <van-button 
+          :disabled="isSend"
+          class="sms-code" 
+          slot="button" 
+          size="small" 
+          type="primary"
+          @click="sentOtp"
+        >
+          {{otpText}}
         </van-button>
       </van-field>
       <van-field
@@ -31,6 +38,18 @@
         label="学员年龄"
         placeholder="请输入学员年龄"
       />
+      <van-cell class="van-field subject-content" title="学科">
+        <ul>
+          <li 
+            v-for="s in subjects" 
+            :id="JSON.stringify(s)"
+            :class="subed[`${s.id}`] != undefined ? 'active' : ''"
+            @click="toggleSub(s)"
+          >
+            {{s.name}}
+          </li>
+        </ul>    
+      </van-cell>
       <van-field
         v-model="amt"
         clearable
@@ -43,35 +62,162 @@
         disabled
       />
     </van-cell-group>
-    <div class="des-container">
-      <strong>注意事项</strong>
-      <p>此处是活动规则此处是活动规则 此处是活动规则此处是活动规则此处是活</p>
-    </div>
+    <NoteMsg />
     <div class="sub-container">
       <div class="text-content">
-        总费用：<span>600</span>元
+        总费用：<span>{{amt}}</span>元
       </div>     
-      <van-button type="default">去支付</van-button>
+      <van-button type="default" @click="goNext">去支付</van-button>
     </div>
   </div>
 </template>
 
 <script>
+  import { Toast } from 'vant';
+
+  import SendOtp from '../components/SendOtp.vue';
+  import NoteMsg from '../components/NoteMsg.vue';
+  import { getItem } from '../utils/index.js';
+
+  // var debounce = require('lodash.debounce');
+
   export default {
     name: 'collage',
+    components: {
+      SendOtp,
+      NoteMsg,
+    },
     data() {
       return {
         mobile: '',
         sms: '',
         person: '',
         age: '',
-        amt: ''
+        amt: '',
+        subed: {},
+        subjects: [
+          {
+            id: 1,
+            name: '国文',
+          },
+          {
+            id: 2,
+            name: '书法',
+          },
+          {
+            id: 3,
+            name: '国画',
+          },
+          {
+            id: 4,
+            name: '围棋',
+          },
+        ],
+        isSend: false,
+        otpText: '获取验证码',
+        timer: null,
+        time: 60,
       }  
+    },
+    created: function() {
+      const store = getItem('store');
+
+      this.amt = store.id == '123' ? 600 : 1200;
+    },
+    methods: {
+      sentOtp() {
+        const _this = this;
+        let { time, timer, otpText, isSend } = this;
+        const reg = /^1[3|5|6|7|8|9]\d{9}$/;
+
+        if (!reg.test(this.mobile)) {
+          Toast('手机号输入有误！');
+          return;
+        }
+
+        _this.timer = setInterval(function() {
+          if (0 >= time--) {
+            clearInterval(_this.timer);
+            _this.isSend = false;
+            _this.time = 60;
+            _this.timer = null;
+            _this.otpText = '获取验证码';
+          }else {
+            _this.isSend = true;
+            _this.otpText = time > 9 ? `${time}秒` : `0${time}s`; 
+          }
+        }, 1000);
+        _this.sentOtp();
+      },
+      sentOtp() {
+        const { mobile } = this;
+        
+        // 发送短信验证码
+      },
+      toggleSub(sub) {
+        let obj = { ...this.subed }; 
+        const { id } = sub;
+
+        if (obj[`${id}`] != undefined) {
+          delete obj[`${id}`];
+        } else {
+          obj[`${id}`] = sub;
+        }
+
+        this.subed = obj;
+      },
+      submit() {
+        const reg = /^1[356789]\d{9}$/;
+        const { mobile, sms, person, age } = this;
+
+        if (mobile == '' || !reg.test(mobile)) {
+          Toast('手机号输入有误！');
+          return;  
+        }
+        if (sms == '') {
+          Toast('验证码不能为空！');
+          return;    
+        }
+        if (person == '') {
+          Toast('联系人不能为空！');
+          return;    
+        }
+        if (age == '') {
+          Toast('年龄不能为空！');
+          return;    
+        }
+
+        // 提交表单数据
+      },
+      goNext() {
+        this.$router.push('/success');
+      }
     }
   }
 </script>
 
 <style lang="scss">
+  .subject-content {
+    .van-cell__value {
+      text-align: left;
+    }
+    li {
+      display: inline-block;
+      height: 24px;
+      line-height: 24px;
+      padding: 0 14px;
+      border: 1PX solid #ddd;
+      font-size: 11px;
+      color: #bbb;
+      border-radius: 12px;
+      margin-right: 8px;
+      margin-bottom: 14px;
+      &.active {
+        color: #FFC16F;
+        border-color: #FFC16F;
+      }
+    }
+  }
   .form-container {
     color: #555;
     font-size: 14px;
@@ -81,10 +227,18 @@
         padding: 11px 18px;
       }
     }
+    .subject-content {
+      padding-bottom: 0;
+    }
     .sms-code {
       background: #FFECD3;
       color: #FFC16F;
       border-color: #FFECD3;  
+    }
+    .van-button--disabled {
+      color: #999;
+      background-color: #e8e8e8;
+      border: 0.02rem solid #e5e5e5;  
     }
   }
   .des-container {

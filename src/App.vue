@@ -5,8 +5,16 @@
 </template>
 
 <script>
+  import { getToken } from './api/service.js';
+
   export default {
     name: 'app',
+    methods: {
+
+    },
+    created: function () {
+      getToken();
+    }
   }
 </script>
 
@@ -33,5 +41,12 @@
       font-size: 16px;
       color: #fff;      
     }
+  }
+  .img {
+    width: 100%;
+  }
+  .tipimg {
+    width: 100%;
+    height: 160px;
   }
 </style>
