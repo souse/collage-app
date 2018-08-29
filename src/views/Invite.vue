@@ -18,8 +18,8 @@
       }
     },
     created() {
-
-    },
+      console.log(2);
+    }
   }
 </script>
 

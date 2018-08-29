@@ -5,15 +5,18 @@
 </template>
 
 <script>
-  import { getToken } from './api/service.js';
+  import { hostNames } from './utils/index';
+  import { getToken } from './api/service';
 
   export default {
     name: 'app',
     methods: {
 
     },
-    created: function () {
-      getToken();
+    created: async function () {
+      if (!hostNames.includes(window.location.hostname)) {
+        const token = await getToken();
+      }    
     }
   }
 </script>

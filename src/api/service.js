@@ -1,12 +1,19 @@
-import axios from 'axios';
-import baseURI from './index.js';
-
+import request from '../utils/request';
 /**
  * 获取token
  * @return {[type]} [description]
  */
-export const getToken = () => {
-  console.log('getToken...');
+export const getToken = async () => {
+  return request.ajax('/get-wechat-auth-link');
+}
+
+/**
+ * 根据分馆id 获取分馆可以参加的活动信息
+ * @param  {[type]} storeId [description]
+ * @return {[type]}         [description]
+ */
+export const getStoreActivity = async (storeId) => {
+  return request.ajax('/activity/get-store-activity-role', { data: { storeId, } });
 }
 
 /**

@@ -15,29 +15,45 @@
 </template>
 
 <script>
-  import { setItem } from '../utils/index.js';
+  import { mapMutations, mapState } from 'vuex';
+  import { setItem } from '../utils/index';
+  import { getStoreActivity } from '../api/service';
 
   export default {
     name: 'home',
     data() {
       return {
-        id: '', // 123 佛山馆(600), 其他区(1200)
-        name: '',
+        // id: '', // 123 佛山馆(600), 其他区(1200)
+        // name: '',
         base: '1200',
         arr: ['01', '02', '03', '04', '05', '06', '07', '08', '09'],
       }
     },
     components: {},
-    created: function () {
+    computed: mapState([
+      'store',
+    ]),
+    created: async function () {
       const { query } = this.$route;
-      const { id, name } = query;
+      const { id } = query;
+      const storeActivity = await getStoreActivity(id).then(res => {
+        if (!res || res.code != 0) return null;
 
-      this.id = id;
-      this.name = name;
-      this.base = id == 123 ? '600' : '1200';
-      setItem('store', query);
+        return res.data.storeActivityRole.hutongActivity; 
+      });
+      this.setStore({ 
+        store: { 
+          ...query, 
+          activityPrice: storeActivity.activityPrice,
+          activityId: storeActivity.id,  
+        } 
+      });
+      this.base = `${storeActivity.activityPrice}`;
     },
     methods: {
+      ...mapMutations({
+        setStore: 'SET_STORE',
+      }),
       startCollage: function() {
         this.$router.push('/collage');
       }

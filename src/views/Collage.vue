@@ -27,7 +27,7 @@
         </van-button>
       </van-field>
       <van-field
-        v-model="person"
+        v-model="name"
         clearable
         label="联系人"
         placeholder="请输入联系人"
@@ -41,7 +41,7 @@
       <van-cell class="van-field subject-content" title="学科">
         <ul>
           <li 
-            v-for="s in subjects" 
+            v-for="s in subjectList" 
             :id="JSON.stringify(s)"
             :class="subed[`${s.id}`] != undefined ? 'active' : ''"
             @click="toggleSub(s)"
@@ -73,11 +73,13 @@
 </template>
 
 <script>
+  import { mapMutations, mapActions, mapState } from 'vuex';
   import { Toast } from 'vant';
 
   import SendOtp from '../components/SendOtp.vue';
   import NoteMsg from '../components/NoteMsg.vue';
-  import { getItem } from '../utils/index.js';
+  import { getItem, basicActivityStores } from '../utils/index';
+  import request from '../utils/request';
 
   // var debounce = require('lodash.debounce');
 
@@ -91,47 +93,43 @@
       return {
         mobile: '',
         sms: '',
-        person: '',
+        name: '',
         age: '',
         amt: '',
         subed: {},
-        subjects: [
-          {
-            id: 1,
-            name: '国文',
-          },
-          {
-            id: 2,
-            name: '书法',
-          },
-          {
-            id: 3,
-            name: '国画',
-          },
-          {
-            id: 4,
-            name: '围棋',
-          },
-        ],
+        
         isSend: false,
         otpText: '获取验证码',
         timer: null,
         time: 60,
       }  
     },
-    created: function() {
-      const store = getItem('store');
+    computed: {
+      ...mapState([ 
+        //'store',
+        'subjectList' 
+      ])
+    },
+    created: async function() {
+      const { id } = this.store || getItem('store');
 
-      this.amt = store.id == '123' ? 600 : 1200;
+      this.amt = basicActivityStores.indexOf(id) != -1 ? 600 : 1200;
+      await this.getSubject({ storeId: id });
     },
     methods: {
+      ...mapMutations({
+        updateFroms: 'UPDATE_FORMS',
+      }),
+      ...mapActions([
+        'getSubject'
+      ]),
       sentOtp() {
         const _this = this;
         let { time, timer, otpText, isSend } = this;
-        const reg = /^1[3|5|6|7|8|9]\d{9}$/;
+        const reg = /^1[356789]\d{9}$/;
 
         if (!reg.test(this.mobile)) {
-          Toast('手机号输入有误！');
+          Toast({ message: '手机号输入有误！', duration: 1000 });
           return;
         }
 
@@ -149,11 +147,6 @@
         }, 1000);
         _this.sentOtp();
       },
-      sentOtp() {
-        const { mobile } = this;
-        
-        // 发送短信验证码
-      },
       toggleSub(sub) {
         let obj = { ...this.subed }; 
         const { id } = sub;
@@ -168,7 +161,7 @@
       },
       submit() {
         const reg = /^1[356789]\d{9}$/;
-        const { mobile, sms, person, age } = this;
+        const { mobile, sms, name, age } = this;
 
         if (mobile == '' || !reg.test(mobile)) {
           Toast('手机号输入有误！');
@@ -178,7 +171,7 @@
           Toast('验证码不能为空！');
           return;    
         }
-        if (person == '') {
+        if (name == '') {
           Toast('联系人不能为空！');
           return;    
         }
@@ -190,7 +183,7 @@
         // 提交表单数据
       },
       goNext() {
-        this.$router.push('/success');
+        // this.$router.push('/success');
       }
     }
   }
