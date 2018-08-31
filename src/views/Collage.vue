@@ -9,7 +9,7 @@
       />
       <van-field
         class="cms-code-content"
-        v-model="sms"
+        v-model="mobileCode"
         center
         clearable
         label="验证码"
@@ -51,7 +51,8 @@
         </ul>    
       </van-cell>
       <van-field
-        v-model="amt"
+        v-model="activityPrice"
+        readonly
         clearable
         label="套餐"
         placeholder="请输入套餐"
@@ -65,7 +66,7 @@
     <NoteMsg />
     <div class="sub-container">
       <div class="text-content">
-        总费用：<span>{{amt}}</span>元
+        总费用：<span>{{activityPrice}}</span>元
       </div>     
       <van-button type="default" @click="goNext">去支付</van-button>
     </div>
@@ -79,7 +80,8 @@
   import SendOtp from '../components/SendOtp.vue';
   import NoteMsg from '../components/NoteMsg.vue';
   import { getItem, basicActivityStores } from '../utils/index';
-  import request from '../utils/request';
+  import { submitCollage } from '../api/service';
+
 
   // var debounce = require('lodash.debounce');
 
@@ -92,16 +94,17 @@
     data() {
       return {
         mobile: '',
-        sms: '',
+        mobileCode: '',
         name: '',
         age: '',
-        amt: '',
+        activityPrice: '',
         subed: {},
         
         isSend: false,
         otpText: '获取验证码',
         timer: null,
         time: 60,
+        store: getItem('store'), 
       }  
     },
     computed: {
@@ -111,10 +114,11 @@
       ])
     },
     created: async function() {
-      const { id } = this.store || getItem('store');
+      // const store = getItem('store');
+      const { storeId, activityPrice } = this.store;
 
-      this.amt = basicActivityStores.indexOf(id) != -1 ? 600 : 1200;
-      await this.getSubject({ storeId: id });
+      this.activityPrice = activityPrice; 
+      await this.getSubject({ storeId });
     },
     methods: {
       ...mapMutations({
@@ -159,15 +163,15 @@
 
         this.subed = obj;
       },
-      submit() {
+      async submit() {
         const reg = /^1[356789]\d{9}$/;
-        const { mobile, sms, name, age } = this;
+        const { mobile, mobileCode, name, age, subed } = this;
 
         if (mobile == '' || !reg.test(mobile)) {
           Toast('手机号输入有误！');
           return;  
         }
-        if (sms == '') {
+        if (mobileCode == '') {
           Toast('验证码不能为空！');
           return;    
         }
@@ -179,11 +183,29 @@
           Toast('年龄不能为空！');
           return;    
         }
+        const subjectId = Object.keys(subed).join(',');
+        const params = {
+          method: 'POST',
+          // formData: true,
+          data: {
+            name,
+            mobile,
+            mobileCode,
+            age,
+            subjectId,
+            ...this.store,
+          }
+        };    
+        const wxRequest = await submitCollage(params).then(res => {
+          if (!res || res.code != 0) return;
 
-        // 提交表单数据
+          return res.data;
+        });
+
+        console.log('wxRequest', wxRequest);
       },
       goNext() {
-        // this.$router.push('/success');
+        this.$router.push('/success');
       }
     }
   }

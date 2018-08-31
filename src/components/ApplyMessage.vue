@@ -4,27 +4,27 @@
     <ul>
       <li>
         <div>联系人：</div>
-        <div>张小姐</div>
+        <div>{{order.name || ''}}</div>
       </li>
       <li>
         <div>联系电话：</div>
-        <div>135-1234-9087</div>
+        <div>{{tel}}</div>
       </li>
       <li>
         <div>学员年龄：</div>
-        <div>13岁</div>
+        <div>{{order.age || ''}}岁</div>
       </li>
       <li>
         <div>意向分馆：</div>
-        <div>星爆馆</div>
+        <div>{{order.storeName || ''}}</div>
       </li>
       <li>
         <div>意向科目：</div>
-        <div>国画</div>
+        <div>{{order.subject == undefined ? '' : order.subject.name}}</div>
       </li>
       <li>
         <div>报名金额</div>
-        <div>600元</div>
+        <div>{{order.activityPrice || '-'}}元</div>
       </li>
     </ul>
   </div>
@@ -33,7 +33,15 @@
 <script>
   export default {
     name: 'applymessage',
+    props: [ 'order' ],
+    computed: {
+      tel: function() {
+        const { order } = this;
 
+        return Object.keys(order).length == 0 ? '' : order.mobile.substring(0, 3) + '-' + order.mobile.substring(3, 7) + '-' + order.mobile.substring(7, 11);
+      }
+    },
+    mounted() { }
   }  
 </script>
 

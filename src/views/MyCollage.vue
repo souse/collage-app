@@ -1,10 +1,10 @@
 <template>
   <div class="mycollage-container">
     <div class="tipimg">
-      <img src="#" alt="图片">
+      <img src="../assets/icon_logo.png" alt="图片">
     </div>
     <div class="collage-content">
-      <div v-if="type == 1" class="collageing-container">
+      <div v-if="groupStatus == 'STARTING'" class="collageing-container">
         <div class="collageing-content">
           <div class="progress">
             <span class="pro" :style="{ 'width': '30%' }"></span>
@@ -14,68 +14,105 @@
         </div>
         <p class="time-last">剩余时间 <span>43:32:21</span></p>
       </div>
-      <div v-else class="collaged">
+      <div v-else-if="groupStatus == 'SUCCESS'" class="collaged">
         <span>拼团结束</span>
       </div>
+      <div v-else :style="{ height: '36px'}" />
       <ul class="person">
-        <li v-for="p in pss" :class="p.id == undefined ? 'li-boder' : ''"></li>
+        <li v-for="p in pss" :class="p.id == undefined ? 'li-boder' : ''">
+          <img v-if="p.id != undefined" :src="p.user.headImageUrl" alt="头像">
+        </li>
       </ul> 
-      <p class="time-tip">每人获得：<span>4</span> 课时</p> 
+      <p class="time-tip">每人获得：<span>{{group == null ? '' : group.giftLessonHours}}</span> 课时</p> 
     </div>
-    <div class="msg">
-      <ApplyMessage />
+    <div v-if="myOrder != '' && myOrder != null">
+      <div class="msg">
+        <ApplyMessage :order="myOrder" />
+      </div>
+      <NoteMsg />
     </div>
-    <NoteMsg />
-    <div class="btns">
-      <van-button 
-        v-if="type == 1"
-        type="default" 
-        class="btn common"
-      >
-        邀请好友拼团
-      </van-button>
-      <van-button 
-        v-else
-        type="default" 
-        class="btn common"
-      >
-        <a href="tel:4004001234">联系客服</a>
-      </van-button>
-    </div>
+    <img 
+      class="img"
+      v-if="showPropagandaImgs == true"
+      v-for="id in arr" 
+      :src="'http://o9m9wx1i2.bkt.clouddn.com/collage/' + group.activityPrice + '/' + group.activityPrice + '_' + id + '.png'" alt="宣传图片" />
+    <CollageBtns :myOrder="myOrder" :group="group" />
+    <van-loading
+      v-if="loading == true"
+      class="ajax-loading" 
+      type="circular" 
+      color="white"
+      size="60px"
+    />
   </div>
 </template>
 
 <script>
+  import { getGroupOrder } from '../api/service';
+
   import ApplyMessage from '../components/ApplyMessage.vue';
   import NoteMsg from '../components/NoteMsg.vue';
+  import CollageBtns from '../components/CollageBtns.vue';
+  import { propagandaImgs } from '../utils/index';
 
   export default {
     name: 'mycollage',
     components: {
       ApplyMessage,
       NoteMsg,
+      CollageBtns,
     },
     data() {
       return {
-        type: 0,
-        defaults: [{}, {}, {}, {}, {}],
-        persons: [{ id: 1 }, { id: 2 }],
+        arr: propagandaImgs,
+        defaultOrders: [{}, {}, {}, {}, {}],
+        group: null, // 该团信息
+        orders: [], // 拼团人信息
+        myOrder: "", // 个人拼团信息 初始: ""，null: 暂时没有拼团， {...}: 我的拼团信息
+        loading: false,
       }
     },
     computed: {
+      groupStatus: function() {
+        const { group } = this;
+
+        if (group != null) return group.groupStatus;
+        return '';  
+      },
+      showPropagandaImgs: function() {
+        // true: 暂没参加拼团
+        const { myOrder, group } = this;
+
+        if ((myOrder != '' && myOrder == null)) {
+          return true;
+        }
+        return false;
+      },
       pss: function () {
-        const ps = this.persons;
+        const ps = this.orders;
         const len = ps.length;
 
-        return ps.concat(this.defaults.slice(len));
+        return ps.concat(this.defaultOrders.slice(len));
       }
+    },
+    async mounted() {
+      await getGroupOrder(6).then(res => {
+        if (!res || res.code != 0) return;
+
+        const { group, myOrder, orders } = res.data;
+        
+        this.group = group;
+        this.myOrder = myOrder;
+        // this.myOrder = null;
+        this.orders = orders;  
+      });   
     }
   }
 </script>
 
 <style lang="scss">
   .mycollage-container {
-    // padding-bottom: 62px;
+    padding-bottom: 62px;
     .collage-content {
       padding: 17px 32px 12px;
       background: #fff;
@@ -86,9 +123,13 @@
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          border: 1px solid red;
+          // border: 1px solid red;
           &.li-boder {
             border: 1px dashed #ccc;
+          }
+          img {
+            width: 100%;
+            border-radius: 50%;
           }
         }
       }
@@ -136,7 +177,7 @@
     .collageing-content {
       display: flex;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       .progress {
         position: relative;
         flex: 1;
@@ -202,8 +243,12 @@
       margin-top: 12px;
     }
     .btns {
-      margin: 12px auto;
+      //margin: 12px auto;
       text-align: center;
+      position: fixed;
+      bottom: 8px;
+      left: 0;
+      width: 100%;
     }
     .btn {
       position: relative;
@@ -218,11 +263,8 @@
         color: #fff;
       }
     }
-    // .btn {
-    //   position: fixed;
-    //   bottom: 8px;
-    //   left: 50%;
-    //   margin-left: -167.5px;
-    // }
+    .img {
+      margin-top: 10px;
+    }
   }  
 </style>

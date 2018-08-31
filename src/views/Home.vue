@@ -18,6 +18,7 @@
   import { mapMutations, mapState } from 'vuex';
   import { setItem } from '../utils/index';
   import { getStoreActivity } from '../api/service';
+  import { propagandaImgs } from '../utils/index';
 
   export default {
     name: 'home',
@@ -26,7 +27,7 @@
         // id: '', // 123 佛山馆(600), 其他区(1200)
         // name: '',
         base: '1200',
-        arr: ['01', '02', '03', '04', '05', '06', '07', '08', '09'],
+        arr: propagandaImgs,
       }
     },
     components: {},
@@ -35,8 +36,8 @@
     ]),
     created: async function () {
       const { query } = this.$route;
-      const { id } = query;
-      const storeActivity = await getStoreActivity(id).then(res => {
+      const { storeId } = query;
+      const storeActivity = await getStoreActivity(storeId).then(res => {
         if (!res || res.code != 0) return null;
 
         return res.data.storeActivityRole.hutongActivity; 
@@ -45,7 +46,7 @@
         store: { 
           ...query, 
           activityPrice: storeActivity.activityPrice,
-          activityId: storeActivity.id,  
+          hutongActivityId: storeActivity.id,  
         } 
       });
       this.base = `${storeActivity.activityPrice}`;

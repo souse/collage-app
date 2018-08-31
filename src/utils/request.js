@@ -24,7 +24,7 @@ const request = {
 
     if (!options.noToken) {
       if (hostNames.includes(window.location.hostname)) {
-        token = 'Bearer ' + base.encode('gytest-act-123');  
+        token = 'Bearer ' + base.encode('gytest-act-456');  
       } else {
         const tokenKey = getItem('COOKIE_TOKEN_KEY');
 
@@ -39,7 +39,7 @@ const request = {
     if(method.toUpperCase() === 'GET') {
       url = url + (data ? ('?' + _this.formDataCode(data)) : '');  
     } else {
-      if (option.formData) {
+      if (options.formData) {
         params.headers[ 'Content-Type' ] = 'application/x-www-form-urlencoded';
         params.body = _this.formDataCode(data);
       } else {

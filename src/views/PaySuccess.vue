@@ -4,7 +4,7 @@
       <div class="title">
         <span>支付成功</span>
       </div>
-      <ApplyMessage />
+      <ApplyMessage :order="order" />
     </div>
     <div class="qc-content">
       <p>请扫码关注秦汉胡同公众号，获取拼团最新消息</p>
@@ -21,16 +21,32 @@
 </template>
 
 <script>
+  import { getOrder } from '../api/service';
   import ApplyMessage from '../components/ApplyMessage.vue';
 
   export default {
     name: 'paysuccess',
+    data() {
+      return {
+        activityOrderId: 4,
+        order: {}
+      }
+    },
     components: {
       ApplyMessage,
     },
+    async mounted() {
+      const _this = this;
+
+      await getOrder(_this.activityOrderId).then(res => {
+        if (!res || res.code != 0) return;
+
+        _this.order = res.data.order;
+      });  
+    },
     methods: {
       goNext: function() {
-        this.$router.push('');
+        this.$router.push('/mycollage');
       }
     }
   }

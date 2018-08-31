@@ -20,8 +20,8 @@ export const getStoreActivity = async (storeId) => {
  * 获取科目列表
  * @return {[type]} [description]
  */
-export const getSubjects = () => {
-
+export const getSubjects = async (params) => {
+  return request.ajax('/selections/get-store-subjects', params);
 }
 
 /**
@@ -36,8 +36,26 @@ export const checkStudents = () => {
  * 提交拼团
  * @return {[type]} [description]
  */
-export const submitCollage = () => {
+export const submitCollage = async (params) => {
+  return request.ajax('/activity/submit-activity-order', params);
+}
 
+/**
+ * 获取个人提交的订单信息
+ * @param  {[type]} params [description]
+ * @return {[type]}        [description]
+ */
+export const getOrder = async (id) => {
+  return request.ajax(`/activity/get-activity-order-detail?activityOrderId=${id}`);
+}
+
+/**
+ * 获取拼团订单信息
+ * @param  {[type]} groupId [description]
+ * @return {[type]}         [description]
+ */
+export const getGroupOrder = async (groupId) => {
+  return request.ajax(`/activity/get-group-detail?groupId=${groupId}`);
 }
 
 /**

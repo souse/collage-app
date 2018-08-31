@@ -51,5 +51,18 @@
   .tipimg {
     width: 100%;
     height: 160px;
+    img {
+      width: inherit;
+    }
+  }
+  .ajax-loading {
+    position: fixed;
+    padding: 10px;
+    top: 200px;
+    left: 50%;
+    margin-left: -30px;
+    background-color: rgba(0, 0, 0, .5);
+    border-radius: 3px;
+    z-index: 999;
   }
 </style>

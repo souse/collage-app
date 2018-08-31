@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import { getItem, setItem } from './utils/index';
 import request from './utils/request';
+import { getSubjects } from './api/service';
 import { 
   SET_SUBJECTS, 
   UPDATE_FORMS, 
@@ -50,10 +51,10 @@ export default new Vuex.Store({
           storeId,
         }
       };
-      await request.ajax('/selections/get-store-subjects', params).then(res => {
+      await getSubjects(params).then(res => {
         if (res && res.code == 0) {
           commit('SET_SUBJECTS', { list: res.data.subjects });
-        }
+        }  
       });
     }
   },
