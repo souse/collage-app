@@ -10,15 +10,20 @@
 </template>
 
 <script>
+  import { getShareImg } from '../api/service';
+
   export default {
     name: 'invite',
     data() {
       return {
-
+        src: '',
       }
     },
-    created() {
-      console.log(2);
+    async created() {
+      // await getShareImg().then(res => {
+      //   if (!res || res.code !=0) return;
+      //   this.src = res.code.src;
+      // });    
     }
   }
 </script>

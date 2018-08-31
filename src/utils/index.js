@@ -25,6 +25,17 @@ export function isUrl(path) {
 }
 
 /**
+ * 获取Parame value
+ * @param name {string} parame name
+ * @returns {Array|{index: number, input: string}|string}
+ */
+export const getParameterByName = name => {
+    const match = RegExp('[?&]' + name + '=([^&]*)')
+        .exec(window.location.href)
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '))
+}
+
+/**
  * 开发用 免token
  * @type {Array}
  */

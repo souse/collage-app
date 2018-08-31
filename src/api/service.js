@@ -3,8 +3,8 @@ import request from '../utils/request';
  * 获取token
  * @return {[type]} [description]
  */
-export const getToken = async () => {
-  return request.ajax('/get-wechat-auth-link');
+export const getToken = async (params) => {
+  return await request.ajax('/get-wechat-auth-link', params);
 }
 
 /**
@@ -64,5 +64,9 @@ export const getGroupOrder = async (groupId) => {
  */
 export const getSollage = () => {
 
+}
+
+export const getShareImg = async () => {
+  return request.ajax(`/xxx?groupId=1`);
 }
 

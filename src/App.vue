@@ -5,18 +5,35 @@
 </template>
 
 <script>
-  import { hostNames } from './utils/index';
+  import { hostNames, getItem, setItem } from './utils/index';
   import { getToken } from './api/service';
 
   export default {
     name: 'app',
-    methods: {
-
-    },
+    methods: {},
     created: async function () {
+      /**
       if (!hostNames.includes(window.location.hostname)) {
-        const token = await getToken();
+        const { token } = this.$route.query;
+        const COOKIE_TOKEN_KEY = sessionStorage.getItem('COOKIE_TOKEN_KEY');
+
+        if(COOKIE_TOKEN_KEY == null) {
+          if (token != undefined) { //存token
+            setItem('COOKIE_TOKEN_KEY', token);
+          }else {
+            const params = {
+              method: 'POST',
+              noToken: true,
+              formData: true,
+              data: { 
+                originUrl: encodeURIComponent(window.location.href); 
+              },
+            }
+            const response = await getToken(params);
+          }
+        }
       }    
+      **/
     }
   }
 </script>

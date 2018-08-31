@@ -4,6 +4,7 @@
       v-if="flag == 1"
       type="default" 
       class="btn common"
+      @click="inviteFired"
     >
       邀请好友拼团
     </van-button>
@@ -48,6 +49,11 @@
           }
         }
         return '';
+      }
+    },
+    methods: {
+      inviteFired() {
+        this.$router.push('/invite');  
       }
     }
   }

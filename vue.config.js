@@ -8,6 +8,8 @@ module.exports = {
   productionSourceMap: undefined,
   parallel: undefined,
   configureWebpack: config => {
-    //console.log(config);
+    if (process.env.NODE_ENV === 'development') {
+      // config.plugin.push();
+    }
   }
 }

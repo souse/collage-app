@@ -1,6 +1,6 @@
 import { Toast } from 'vant';
 import baseURI from '../api/index';
-import { getItem, removeItem, hostNames } from './index';
+import { getItem, removeItem, hostNames, getParameterByName } from './index';
 
 const request = {
   options:{
@@ -13,7 +13,7 @@ const request = {
   ajax: function(url, options = {}) {
     const _this = this;
     if (!url) return;
-    
+
     options = { ...this.options, ...options };
     const base = new Base64();
     let params = {
@@ -26,9 +26,13 @@ const request = {
       if (hostNames.includes(window.location.hostname)) {
         token = 'Bearer ' + base.encode('gytest-act-456');  
       } else {
-        const tokenKey = getItem('COOKIE_TOKEN_KEY');
+        if (!_this.checkToken()) {
+          _this.callback({ status: 401 });
+          return;  
+        }
+        const tokenKey = sessionStorage.getItem('COOKIE_TOKEN_KEY');
 
-        token = 'Bearer ' + base.encode(cookieTokenKey || 'need token');  
+        token = 'Bearer ' + base.encode(tokenKey || 'need token');  
       }
       // add token
       params.headers[ 'Authorization' ] = token;
@@ -50,21 +54,40 @@ const request = {
     return fetch(`${baseURI + url}`, params).then(_this.callback).catch(_this.errHandle);
   },
 
+  checkToken: function() {
+    let token = sessionStorage.getItem('COOKIE_TOKEN_KEY');
+
+    if (token == null) {
+      token = getParameterByName('token');
+
+      if (token == null) {
+        return false;
+      } else {
+        sessionStorage.setItem('COOKIE_TOKEN_KEY', token);
+        return true;
+      } 
+    }
+    return true;
+  },
+
   callback: function(res) {
+    const _this = this;
+
     if (res.status == 401) {
       const params = {
         noToken: true,
         method: 'POST',
         formData: true,
-        data: { originUrl: window.location.href },
+        data: { originUrl: encodeURIComponent(window.location.href) },
       };
 
       removeItem('COOKIE_TOKEN_KEY');
-      Base.ajax('/get-wechat-auth-link', params).then(res => {
+      _this.ajax('/get-wechat-auth-link', params).then(res => {
         if (res.code == 0) {
-            window.location.href = res.data.wechatAuthUrl;
+          window.location.href = res.data.wechatAuthUrl;
         }
-      })
+      });
+      throw new Error('come to get auth-link ...');
     }
 
     return res.json().then(response => {
